@@ -4,6 +4,7 @@
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
   <MAINGROUP id="E5R5qp" name="NoteDetector">
     <GROUP id="{5CBAEF3C-16F7-962D-5574-89DD7131A170}" name="Source">
+      <FILE id="hlMYPO" name="Analyser.h" compile="0" resource="0" file="Source/Analyser.h"/>
       <FILE id="lYIT9P" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="JAaaW0" name="PluginProcessor.h" compile="0" resource="0"

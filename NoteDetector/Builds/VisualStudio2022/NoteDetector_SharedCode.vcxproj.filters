@@ -3405,6 +3405,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Analyser.h">
+      <Filter>NoteDetector\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\PluginProcessor.h">
       <Filter>NoteDetector\Source</Filter>
     </ClInclude>

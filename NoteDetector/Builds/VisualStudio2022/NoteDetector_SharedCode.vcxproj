@@ -2701,6 +2701,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Analyser.h"/>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h"/>
