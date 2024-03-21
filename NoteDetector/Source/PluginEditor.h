@@ -18,13 +18,13 @@ class NoteDetectorAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
     NoteDetectorAudioProcessorEditor (NoteDetectorAudioProcessor&);
-    void getNextAudioBlock();
     ~NoteDetectorAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
+    juce::StringArray notes = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
 
 private:
@@ -35,8 +35,16 @@ private:
     juce::Label noteLabel;
 
     juce::String getRandomNote() {
-        juce::StringArray notes = { "A", "B", "C", "D", "E", "F", "G" };
         return notes[std::rand() % notes.size()];
+    }
+
+    void displayDetectedNote(const juce::String& noteName) {
+        // Update the label with the detected note
+        noteLabel.setText("Current Note: " + noteName, juce::dontSendNotification);
+    }
+
+    juce::String getNoteName(int index) {
+        return notes[index % 12];
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NoteDetectorAudioProcessorEditor)
