@@ -25,6 +25,15 @@ NoteDetectorAudioProcessorEditor::~NoteDetectorAudioProcessorEditor()
 {
 }
 
+void NoteDetectorAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
+{
+    if (parameterIndex == audioProcessor.detectedPitchParameter->getParameterIndex())
+    {
+        // Update GUI with detected pitch
+        displayDetectedNote(getNoteName(newValue));
+    }
+}
+
 //==============================================================================
 void NoteDetectorAudioProcessorEditor::paint (juce::Graphics& g)
 {

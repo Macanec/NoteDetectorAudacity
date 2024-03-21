@@ -22,6 +22,8 @@ NoteDetectorAudioProcessor::NoteDetectorAudioProcessor()
                        )
 #endif
 {
+    detectedPitchParameter = new juce::AudioParameterFloat("DetectedPitch", "Detected Pitch", 0.0f, 20000.0f, 0.0f);
+    addParameter(detectedPitchParameter);
 }
 
 NoteDetectorAudioProcessor::~NoteDetectorAudioProcessor()
@@ -129,32 +131,54 @@ bool NoteDetectorAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
-void NoteDetectorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+// Autocorrelation-based pitch detection function
+double detectPitch(const std::vector<float>& audioBuffer, double sampleRate) {
+    const int numSamples = audioBuffer.size();
+
+    // Autocorrelation variables
+    double maxCorrelation = 0.0;
+    int maxShift = 0;
+
+    // Autocorrelation computation
+    for (int shift = 1; shift < numSamples; ++shift) {
+        double correlation = 0.0;
+        for (int i = 0; i < numSamples - shift; ++i) {
+            correlation += audioBuffer[i] * audioBuffer[i + shift];
+        }
+        if (correlation > maxCorrelation) {
+            maxCorrelation = correlation;
+            maxShift = shift;
+        }
+    }
+
+    // Compute pitch from the autocorrelation peak
+    double fundamentalPeriod = maxShift / sampleRate;
+    double fundamentalFrequency = 1.0 / fundamentalPeriod;
+
+    return fundamentalFrequency;
+}
+
+void NoteDetectorAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    // ScopedNoDenormals is used to avoid denormal numbers, which can cause performance issues
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+    // Get the total number of input channels
+    auto totalNumInputChannels = getTotalNumInputChannels();
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
+    // Iterate over each input channel
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
+        auto* channelData = buffer.getReadPointer(channel); // Get pointer to the input channel data
 
-        // ..do something to the data...
+        // Convert channelData to std::vector<float>
+        std::vector<float> audioBuffer(channelData, channelData + buffer.getNumSamples());
+
+        // Detect pitch using autocorrelation-based method
+        double pitch = detectPitch(audioBuffer, getSampleRate());
+
+        // Update detected pitch parameter
+        detectedPitchParameter->setValueNotifyingHost((float)pitch);
     }
 }
 
